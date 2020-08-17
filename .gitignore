@@ -1,0 +1,73 @@
+# IDE generated files #
+######################
+.idea/
+.vscode/
+
+# Backup files #
+################
+*~
+*.old
+*.bak
+*.new
+*.orig
+*.save
+
+# Compiled source #
+###################
+*.dylib
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.bz2
+*.tgz
+*.tbz
+*.tbz2
+*.rpm
+*.deb
+
+# Logs and databases #
+######################
+*.log
+
+# OS generated files #
+######################
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+.~lock*
+
+# Project generated files #
+######################
+log
+vendor
+build
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+.glide/
+
+# go package
+go.sum
+
+# bin file
