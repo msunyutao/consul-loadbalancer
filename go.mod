@@ -1,4 +1,4 @@
-module github.com/mae/consul-loadbalancer
+module github.com/mae-pax/consul-loadbalancer
 
 go 1.14
 
