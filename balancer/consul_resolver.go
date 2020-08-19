@@ -494,8 +494,8 @@ func (r *ConsulResolver) updateCandidatePool() {
 	}
 
 	r.rwMu.Lock()
-	defer r.rwMu.Unlock()
 	r.candidatePool = candidatePool
+	r.rwMu.Unlock()
 
 	return
 }
@@ -509,8 +509,8 @@ func (r *ConsulResolver) zoneBalanced(localZone *ServiceZone, crossZone *Service
 }
 
 func (r *ConsulResolver) SelectNode() *ServiceNode {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.rwMu.Lock()
+	defer r.rwMu.Unlock()
 
 	if len(r.candidatePool.Nodes) == 0 {
 		return nil
