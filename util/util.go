@@ -12,13 +12,9 @@ import (
 // Logger for log
 type Logger interface {
 	Debugf(format string, v ...interface{})
-	Debug(args string)
 	Infof(format string, v ...interface{})
-	Info(args string)
 	Warnf(format string, v ...interface{})
-	Warn(args string)
 	Errorf(format string, v ...interface{})
-	Error(args string)
 }
 
 func Zone() string {
