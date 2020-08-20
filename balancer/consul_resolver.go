@@ -3,7 +3,6 @@ package balancer
 import (
 	"math"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/hashicorp/consul/api"
@@ -84,8 +83,6 @@ type ConsulResolver struct {
 	zoneCPUKey         string
 	metric             *ConsulResolverMetric
 	zoneCPUUpdated     bool
-	rwMu               sync.RWMutex
-	mu                 sync.Mutex
 	logger             util.Logger
 }
 
@@ -176,16 +173,16 @@ func (r *ConsulResolver) Start() error {
 	}
 
 	go func() {
-		ts := time.After(r.interval)
+		tk := time.NewTicker(r.interval)
 		for {
 			select {
-			case <-ts:
+			case <-tk.C:
 				if err := r.updateAll(); err != nil {
 					r.logger.Warnf("updateAll failed. err: %s", err.Error())
 				}
-				ts = time.After(r.interval)
 			case <-r.done:
 				r.logger.Infof("consul resolver get stop signal, will stop")
+				tk.Stop()
 				return
 			}
 		}
@@ -493,10 +490,7 @@ func (r *ConsulResolver) updateCandidatePool() {
 		r.logger.Infof("init metric: %+v", r.metric)
 	}
 
-	r.rwMu.Lock()
 	r.candidatePool = candidatePool
-	r.rwMu.Unlock()
-
 	return
 }
 
@@ -509,9 +503,6 @@ func (r *ConsulResolver) zoneBalanced(localZone *ServiceZone, crossZone *Service
 }
 
 func (r *ConsulResolver) SelectNode() *ServiceNode {
-	r.rwMu.Lock()
-	defer r.rwMu.Unlock()
-
 	if len(r.candidatePool.Nodes) == 0 {
 		return nil
 	}
@@ -537,4 +528,14 @@ func (r *ConsulResolver) SelectNode() *ServiceNode {
 
 	r.logger.Infof("metric: %+v", r.metric)
 	return node
+}
+
+func (r *ConsulResolver) GetZoneNodes(zone string) []*ServiceNode {
+	var nodes []*ServiceNode
+	for _, serviceZone := range r.serviceZones {
+		if zone == serviceZone.Zone {
+			nodes = serviceZone.Nodes
+		}
+	}
+	return nodes
 }
