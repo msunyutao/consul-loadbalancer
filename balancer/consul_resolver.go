@@ -94,7 +94,7 @@ type ConsulResolverMetric struct {
 
 type OnlineLab struct {
 	CrossZone         bool    `json:"crossZone"`
-	CrossZoneRate     float64 `json:"crossZoneRate"`
+	CrossZoneRate     float64 `json:"crossZoneRate"` // TODO
 	FactorCacheExpire int     `json:"factorCacheExpire"`
 	FactorStartRate   float64 `json:"factorStartRate"`
 	LearningRate      float64 `json:"learningRate"`
@@ -146,14 +146,14 @@ type InstanceMetaInfo struct {
 	Zone           string  `json:"zone"`
 }
 
-type OnlineLabFactor struct {
-	RateThreshold     float64 `json:"rateThreshold"`
-	LearningRate      float64 `json:"learningRate"`
-	CrossZoneRate     float64 `json:"crossZoneRate"`
-	FactorCacheExpire int     `json:"factorCacheExpire"`
-	CrossZone         bool    `json:"crossZone"`
-	FactorStartRate   float64 `json:"factorStartRate"`
-}
+// type OnlineLabFactor struct {
+// 	RateThreshold     float64 `json:"rateThreshold"`
+// 	LearningRate      float64 `json:"learningRate"`
+// 	CrossZoneRate     float64 `json:"crossZoneRate"`
+// 	FactorCacheExpire int     `json:"factorCacheExpire"`
+// 	CrossZone         bool    `json:"crossZone"`
+// 	FactorStartRate   float64 `json:"factorStartRate"`
+// }
 
 func (r *ConsulResolver) SetLogger(logger util.Logger) {
 	r.logger = logger
@@ -320,8 +320,9 @@ func (r *ConsulResolver) updateServiceZone() error {
 		workload, ok := r.instanceFactorMap[v.InstanceID]
 		if !ok {
 			v.WorkLoad = 100
+		} else {
+			v.WorkLoad = workload
 		}
-		r.instanceFactorMap[v.InstanceID] = workload
 
 		sz, ok := m[v.Zone]
 		if !ok {
