@@ -41,3 +41,9 @@ func IntGenuineRandom(min, max int64) int64 {
 	res, _ := crand.Int(crand.Reader, big.NewInt(max-min+1))
 	return res.Int64() + min
 }
+
+func FloatPseudoRandom() float64 {
+	s := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(s)
+	return r.Float64()
+}

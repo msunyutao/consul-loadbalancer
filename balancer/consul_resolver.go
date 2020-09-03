@@ -146,15 +146,6 @@ type InstanceMetaInfo struct {
 	Zone           string  `json:"zone"`
 }
 
-// type OnlineLabFactor struct {
-// 	RateThreshold     float64 `json:"rateThreshold"`
-// 	LearningRate      float64 `json:"learningRate"`
-// 	CrossZoneRate     float64 `json:"crossZoneRate"`
-// 	FactorCacheExpire int     `json:"factorCacheExpire"`
-// 	CrossZone         bool    `json:"crossZone"`
-// 	FactorStartRate   float64 `json:"factorStartRate"`
-// }
-
 func (r *ConsulResolver) SetLogger(logger util.Logger) {
 	r.logger = logger
 }
@@ -247,6 +238,11 @@ func (r *ConsulResolver) updateZoneCPUMap() error {
 	err = jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal(res.Value, &zc)
 	if err != nil {
 		return err
+	}
+	if time.Now().Unix()-zc.Updated < 300 {
+		r.zoneCPUUpdated = true
+	} else {
+		r.logger.Warnf("%s no update, will hold factor learning", r.zoneCPUKey)
 	}
 	m := make(map[string]float64)
 	for _, v := range zc.Date {
@@ -423,7 +419,7 @@ func (r *ConsulResolver) updateCandidatePool() {
 				localAvgFactor = candidatePool.FactorSum / float64(len(candidatePool.Factors))
 				r.logger.Infof("localAvgFactor updated: %f", localAvgFactor)
 			}
-		} else if r.onlineLab.CrossZone {
+		} else if r.onlineLab.CrossZone && r.zoneCPUMap[r.localZone.Zone] > r.cpuThreshold && r.onlineLab.CrossZoneRate > util.FloatPseudoRandom() {
 			r.logger.Infof("when crossZone is true, current zone: %s, %s", r.zone, serviceZone.Zone)
 			for _, node := range serviceZone.Nodes {
 				candidatePool.Nodes = append(candidatePool.Nodes, node)

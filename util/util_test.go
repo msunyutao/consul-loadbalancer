@@ -19,5 +19,10 @@ func TestIntRandomGenerator(t *testing.T) {
 				t.Logf("random: %d", util.IntGenuineRandom(1, 100))
 			}
 		})
+		Convey("FloatPseudoRandom return random in [0, 1.0)", func() {
+			for i := 0; i < 50; i++ {
+				t.Logf("random: %f", util.FloatPseudoRandom())
+			}
+		})
 	})
 }
