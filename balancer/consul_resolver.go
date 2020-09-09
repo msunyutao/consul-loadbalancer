@@ -84,6 +84,8 @@ type ConsulResolver struct {
 	metric             *ConsulResolverMetric
 	zoneCPUUpdated     bool
 	logger             util.Logger
+	watcherLogger      util.Logger
+	watcher            *util.Watch
 }
 
 type ConsulResolverMetric struct {
@@ -150,6 +152,10 @@ func (r *ConsulResolver) SetLogger(logger util.Logger) {
 	r.logger = logger
 }
 
+func (r *ConsulResolver) SetWatcher(watcherLogger util.Logger) {
+	r.watcherLogger = watcherLogger
+}
+
 func (r *ConsulResolver) SetZone(zone string) {
 	r.zone = zone
 }
@@ -161,6 +167,11 @@ func (r *ConsulResolver) Start() error {
 
 	if r.logger != nil {
 		r.logger.Infof("new consul resolver start. [%#v]", r)
+	}
+
+	if r.watcherLogger != nil {
+		r.watcher = util.NewWatch(r.watcherLogger)
+		r.watcher.RunWatch()
 	}
 
 	go func() {
@@ -184,6 +195,9 @@ func (r *ConsulResolver) Start() error {
 
 func (r *ConsulResolver) Stop() {
 	r.done <- true
+	if r.watcherLogger != nil {
+		r.watcher.Stop()
+	}
 }
 
 func (r *ConsulResolver) updateAll() error {
