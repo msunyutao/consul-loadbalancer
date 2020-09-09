@@ -538,8 +538,10 @@ func (r *ConsulResolver) SelectNode() *ServiceNode {
 	}
 
 	r.logger.Infof("metric: %+v", r.metric)
-	r.watcher.AddWatchValue(node.Host, 1)
-	r.watcher.AddAvgWatchValue(node.Host, node.WorkLoad)
+	if r.watcher != nil && r.watcherLogger != nil {
+		r.watcher.AddWatchValue(node.Host, 1)
+		r.watcher.AddAvgWatchValue(node.Host+"_workload", node.WorkLoad)
+	}
 	return node
 }
 
