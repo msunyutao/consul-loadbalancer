@@ -433,7 +433,7 @@ func (r *ConsulResolver) updateCandidatePool() {
 				localAvgFactor = candidatePool.FactorSum / float64(len(candidatePool.Factors))
 				r.logger.Debugf("localAvgFactor updated: %f", localAvgFactor)
 			}
-		} else if r.onlineLab.CrossZone && r.zoneCPUMap[r.localZone.Zone] > r.cpuThreshold && r.onlineLab.CrossZoneRate > util.FloatPseudoRandom() {
+		} else if r.onlineLab.CrossZone && (r.onlineLab.CrossZoneRate == 1.0 || (r.zoneCPUMap[r.localZone.Zone] > r.cpuThreshold && r.onlineLab.CrossZoneRate > util.FloatPseudoRandom())) {
 			r.logger.Debugf("when crossZone is true, current zone: %s, %s", r.zone, serviceZone.Zone)
 			for _, node := range serviceZone.Nodes {
 				candidatePool.Nodes = append(candidatePool.Nodes, node)
