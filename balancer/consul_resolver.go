@@ -387,7 +387,7 @@ func (r *ConsulResolver) updateCandidatePool() {
 	var localAvgFactor float64
 
 	for _, serviceZone := range serviceZones {
-		if r.localZone.Zone == serviceZone.Zone {
+		if r.localZone != nil && r.localZone.Zone == serviceZone.Zone {
 			r.logger.Debugf("current zone: %s, %s", r.zone, serviceZone.Zone)
 			for _, node := range serviceZone.Nodes {
 				candidatePool.Nodes = append(candidatePool.Nodes, node)
