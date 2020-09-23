@@ -201,7 +201,7 @@ func (r *ConsulResolver) Stop() {
 }
 
 func (r *ConsulResolver) updateAll() error {
-	r.logger.Infof("======== start updateAll ========")
+	r.logger.Debugf("======== start updateAll ========")
 	err := r.updateCPUThreshold()
 	if err != nil {
 		return err
@@ -224,7 +224,7 @@ func (r *ConsulResolver) updateAll() error {
 	}
 	r.expireBalanceFactorCache()
 	r.updateCandidatePool()
-	r.logger.Infof("======== end updateAll ========")
+	r.logger.Debugf("======== end updateAll ========")
 	return nil
 }
 
@@ -239,7 +239,7 @@ func (r *ConsulResolver) updateCPUThreshold() error {
 		return err
 	}
 	r.cpuThreshold = ct.CThreshold
-	r.logger.Infof("update cpuThreshold: %f, key: %s", r.cpuThreshold, r.cpuThresholdKey)
+	r.logger.Debugf("update cpuThreshold: %f, key: %s", r.cpuThreshold, r.cpuThresholdKey)
 	return nil
 }
 
@@ -265,7 +265,7 @@ func (r *ConsulResolver) updateZoneCPUMap() error {
 		}
 	}
 	r.zoneCPUMap = m
-	r.logger.Infof("update zoneCPUMap: %+v, key: %s", r.zoneCPUMap, r.zoneCPUKey)
+	r.logger.Debugf("update zoneCPUMap: %+v, key: %s", r.zoneCPUMap, r.zoneCPUKey)
 	return nil
 }
 
@@ -280,7 +280,7 @@ func (r *ConsulResolver) updateOnlineLabFactor() error {
 		return err
 	}
 	r.onlineLab = &ol
-	r.logger.Infof("update onlineLab: %+v, key: %s", r.onlineLab, r.onlineLabKey)
+	r.logger.Debugf("update onlineLab: %+v, key: %s", r.onlineLab, r.onlineLabKey)
 	return nil
 }
 
@@ -299,7 +299,7 @@ func (r *ConsulResolver) updateInstanceFactorMap() error {
 		m[v.InstanceID] = v.CPUUtilization
 	}
 	r.instanceFactorMap = m
-	r.logger.Infof("update instanceFactorMap: %+v, key: %s", r.instanceFactorMap, r.instanceFactorKey)
+	r.logger.Debugf("update instanceFactorMap: %+v, key: %s", r.instanceFactorMap, r.instanceFactorKey)
 	return nil
 }
 
@@ -348,12 +348,12 @@ func (r *ConsulResolver) updateServiceZone() error {
 			node = v
 			z.Nodes = append(z.Nodes, &node)
 			m[v.Zone] = z
-			r.logger.Infof("service: %s, zone: %s, workload: %f, node: %+v", r.service, v.Zone, z.WorkLoad, v)
+			r.logger.Debugf("service: %s, zone: %s, workload: %f, node: %+v", r.service, v.Zone, z.WorkLoad, v)
 		} else {
 			node := ServiceNode{}
 			node = v
 			sz.Nodes = append(sz.Nodes, &node)
-			r.logger.Infof("service: %s, zone: %s, workload: %f, node: %+v", r.service, v.Zone, sz.WorkLoad, v)
+			r.logger.Debugf("service: %s, zone: %s, workload: %f, node: %+v", r.service, v.Zone, sz.WorkLoad, v)
 		}
 	}
 
@@ -371,7 +371,7 @@ func (r *ConsulResolver) updateServiceZone() error {
 func (r *ConsulResolver) expireBalanceFactorCache() {
 	if 1 == util.IntPseudoRandom(1, r.onlineLab.FactorCacheExpire) {
 		r.balanceFactorCache = make(map[string]float64)
-		r.logger.Infof("remove balanceFactorCache")
+		r.logger.Debugf("remove balanceFactorCache")
 	}
 }
 
@@ -388,7 +388,7 @@ func (r *ConsulResolver) updateCandidatePool() {
 
 	for _, serviceZone := range serviceZones {
 		if r.localZone.Zone == serviceZone.Zone {
-			r.logger.Infof("current zone: %s, %s", r.zone, serviceZone.Zone)
+			r.logger.Debugf("current zone: %s, %s", r.zone, serviceZone.Zone)
 			for _, node := range serviceZone.Nodes {
 				candidatePool.Nodes = append(candidatePool.Nodes, node)
 				candidatePool.Weights = append(candidatePool.Weights, 0)
@@ -397,44 +397,44 @@ func (r *ConsulResolver) updateCandidatePool() {
 					bf, ok := balanceFactorCache[node.InstanceID]
 					if ok {
 						balanceFactor = bf
-						r.logger.Infof("balanceFactor update, factorCached balanceFactor: %f", balanceFactor)
+						r.logger.Debugf("balanceFactor update, factorCached balanceFactor: %f", balanceFactor)
 					} else if localAvgFactor > 0 {
 						balanceFactor = localAvgFactor
-						r.logger.Infof("balanceFactor update, localAvgFactor balanceFactor: %f", balanceFactor)
+						r.logger.Debugf("balanceFactor update, localAvgFactor balanceFactor: %f", balanceFactor)
 					} else {
 						balanceFactor = node.BalanceFactor * r.onlineLab.FactorStartRate
-						r.logger.Infof("balanceFactor update, node.BalanceFactor * r.onlineLab.FactorStartRate balanceFactor: %f", balanceFactor)
+						r.logger.Debugf("balanceFactor update, node.BalanceFactor * r.onlineLab.FactorStartRate balanceFactor: %f", balanceFactor)
 					}
 				}
 				if !r.nodeBalanced(node, serviceZone) && r.zoneCPUUpdated {
 					if node.WorkLoad > serviceZone.WorkLoad {
 						balanceFactor -= balanceFactor * r.onlineLab.LearningRate
-						r.logger.Infof("balanceFactor update, balanceFactor -= balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
+						r.logger.Debugf("balanceFactor update, balanceFactor -= balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
 					} else {
 						balanceFactor += balanceFactor * r.onlineLab.LearningRate
-						r.logger.Infof("balanceFactor update, balanceFactor += balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
+						r.logger.Debugf("balanceFactor update, balanceFactor += balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
 					}
 				}
 				if balanceFactor > BALANCEFACTOR_MAX_LOCAL {
 					balanceFactor = BALANCEFACTOR_MAX_LOCAL
-					r.logger.Infof("balanceFactor update, BALANCEFACTOR_MAX_LOCAL: %f", balanceFactor)
+					r.logger.Debugf("balanceFactor update, BALANCEFACTOR_MAX_LOCAL: %f", balanceFactor)
 				} else if balanceFactor < BALANCEFACTOR_MIN_LOCAL {
 					balanceFactor = BALANCEFACTOR_MIN_LOCAL
-					r.logger.Infof("balanceFactor update, BALANCEFACTOR_MIN_LOCAL: %f", balanceFactor)
+					r.logger.Debugf("balanceFactor update, BALANCEFACTOR_MIN_LOCAL: %f", balanceFactor)
 				}
 				// r.logger.Infof("balanceFactor: %f", balanceFactor)
 				node.CurrentFactor = balanceFactor
 				candidatePool.Factors = append(candidatePool.Factors, balanceFactor)
 				candidatePool.FactorSum += balanceFactor
 				balanceFactorCache[node.InstanceID] = balanceFactor
-				r.logger.Infof("balanceFactorCache: %+v", balanceFactorCache)
+				r.logger.Debugf("balanceFactorCache: %+v", balanceFactorCache)
 			}
 			if len(candidatePool.Factors) > 0 {
 				localAvgFactor = candidatePool.FactorSum / float64(len(candidatePool.Factors))
-				r.logger.Infof("localAvgFactor updated: %f", localAvgFactor)
+				r.logger.Debugf("localAvgFactor updated: %f", localAvgFactor)
 			}
 		} else if r.onlineLab.CrossZone && r.zoneCPUMap[r.localZone.Zone] > r.cpuThreshold && r.onlineLab.CrossZoneRate > util.FloatPseudoRandom() {
-			r.logger.Infof("when crossZone is true, current zone: %s, %s", r.zone, serviceZone.Zone)
+			r.logger.Debugf("when crossZone is true, current zone: %s, %s", r.zone, serviceZone.Zone)
 			for _, node := range serviceZone.Nodes {
 				candidatePool.Nodes = append(candidatePool.Nodes, node)
 				candidatePool.Weights = append(candidatePool.Weights, 0)
@@ -442,51 +442,51 @@ func (r *ConsulResolver) updateCandidatePool() {
 				bf, ok := balanceFactorCache[node.InstanceID]
 				if ok {
 					balanceFactor = bf
-					r.logger.Infof("balanceFactor update, factorCached balanceFactor: %f", balanceFactor)
+					r.logger.Debugf("balanceFactor update, factorCached balanceFactor: %f", balanceFactor)
 				}
 				if !r.zoneBalanced(localZone, serviceZone) && localZone.WorkLoad > r.cpuThreshold && localZone.WorkLoad > serviceZone.WorkLoad {
 					balanceFactor = balanceFactor * BALANCEFACTOR_CROSS_RATE
-					r.logger.Infof("balanceFactor update, balanceFactor = balanceFactor * BALANCEFACTOR_CROSS_RATE: %f", balanceFactor)
+					r.logger.Debugf("balanceFactor update, balanceFactor = balanceFactor * BALANCEFACTOR_CROSS_RATE: %f", balanceFactor)
 				} else {
 					// balanceFactor = balanceFactor * (localZone.WorkLoad - serviceZone.WorkLoad) / 100.0
 					balanceFactor = BALANCEFACTOR_MIN_CROSS
-					r.logger.Infof("balanceFactor update, balanceFactor = BALANCEFACTOR_MIN_CROSS: %f", balanceFactor)
+					r.logger.Debugf("balanceFactor update, balanceFactor = BALANCEFACTOR_MIN_CROSS: %f", balanceFactor)
 				}
 				if r.zoneCPUUpdated {
 					if !r.zoneBalanced(localZone, serviceZone) && localZone.WorkLoad > r.cpuThreshold && localZone.WorkLoad > serviceZone.WorkLoad {
 						if balanceFactor < BALANCEFACTOR_START_CROSS {
 							balanceFactor = BALANCEFACTOR_START_CROSS
-							r.logger.Infof("balanceFactor update, balanceFactor = BALANCEFACTOR_START_CROSS: %f", balanceFactor)
+							r.logger.Debugf("balanceFactor update, balanceFactor = BALANCEFACTOR_START_CROSS: %f", balanceFactor)
 						}
 						balanceFactor += balanceFactor * r.onlineLab.LearningRate
-						r.logger.Infof("balanceFactor update, balanceFactor += balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
+						r.logger.Debugf("balanceFactor update, balanceFactor += balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
 					} else {
 						balanceFactor -= balanceFactor * r.onlineLab.LearningRate
-						r.logger.Infof("balanceFactor update, balanceFactor -= balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
+						r.logger.Debugf("balanceFactor update, balanceFactor -= balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
 					}
 					if !r.nodeBalanced(node, serviceZone) {
 						if node.WorkLoad > serviceZone.WorkLoad {
 							balanceFactor += balanceFactor * r.onlineLab.LearningRate
-							r.logger.Infof("balanceFactor update, balanceFactor += balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
+							r.logger.Debugf("balanceFactor update, balanceFactor += balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
 						} else {
 							balanceFactor -= balanceFactor * r.onlineLab.LearningRate
-							r.logger.Infof("balanceFactor update, balanceFactor -= balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
+							r.logger.Debugf("balanceFactor update, balanceFactor -= balanceFactor * r.onlineLab.LearningRate: %f", balanceFactor)
 						}
 					}
 				}
 				if balanceFactor > BALANCEFACTOR_MAX_CROSS {
 					balanceFactor = BALANCEFACTOR_MAX_CROSS
-					r.logger.Infof("balanceFactor update, BALANCEFACTOR_MAX_CROSS: %f", balanceFactor)
+					r.logger.Debugf("balanceFactor update, BALANCEFACTOR_MAX_CROSS: %f", balanceFactor)
 				} else if balanceFactor < BALANCEFACTOR_MIN_CROSS {
 					balanceFactor = BALANCEFACTOR_MIN_CROSS
-					r.logger.Infof("balanceFactor update, BALANCEFACTOR_MIN_CROSS: %f", balanceFactor)
+					r.logger.Debugf("balanceFactor update, BALANCEFACTOR_MIN_CROSS: %f", balanceFactor)
 				}
 				// r.logger.Infof("balanceFactor: %f", balanceFactor)
 				node.CurrentFactor = balanceFactor
 				candidatePool.Factors = append(candidatePool.Factors, balanceFactor)
 				candidatePool.FactorSum += balanceFactor
 				balanceFactorCache[node.InstanceID] = balanceFactor
-				r.logger.Infof("balanceFactorCache: %+v", balanceFactorCache)
+				r.logger.Debugf("balanceFactorCache: %+v", balanceFactorCache)
 			}
 		}
 	}
@@ -527,7 +527,7 @@ func (r *ConsulResolver) SelectNode() *ServiceNode {
 			idx = i
 		}
 	}
-	r.logger.Infof("index: %d", idx)
+	r.logger.Debugf("index: %d", idx)
 	node := r.candidatePool.Nodes[idx]
 	r.logger.Infof("select node: %+v", node)
 	r.candidatePool.Weights[idx] -= r.candidatePool.FactorSum
