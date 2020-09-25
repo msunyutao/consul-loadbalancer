@@ -498,7 +498,7 @@ func (r *ConsulResolver) updateCandidatePool() {
 		cm := ConsulResolverMetric{}
 		cm.candidatePoolSize = candidatePoolSize
 		r.metric = &cm
-		r.logger.Infof("init metric: %+v", r.metric)
+		r.logger.Debugf("init metric: %+v", r.metric)
 	}
 
 	r.candidatePool = candidatePool
@@ -529,7 +529,7 @@ func (r *ConsulResolver) SelectNode() *ServiceNode {
 	}
 	r.logger.Debugf("index: %d", idx)
 	node := r.candidatePool.Nodes[idx]
-	r.logger.Infof("select node: %+v", node)
+	r.logger.Debugf("select node: %+v", node)
 	r.candidatePool.Weights[idx] -= r.candidatePool.FactorSum
 	r.metric.selectNum += 1
 
@@ -537,7 +537,7 @@ func (r *ConsulResolver) SelectNode() *ServiceNode {
 		r.metric.crossZoneNum += 1
 	}
 
-	r.logger.Infof("metric: %+v", r.metric)
+	r.logger.Debugf("metric: %+v", r.metric)
 	if r.watcher != nil && r.watcherLogger != nil {
 		r.watcher.AddWatchValue(node.Host, 1)
 		r.watcher.AddAvgWatchValue(node.Host+"_workload", node.WorkLoad)
