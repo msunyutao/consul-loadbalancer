@@ -5,8 +5,17 @@ import (
 	"math/big"
 	"math/rand"
 	"os/exec"
-	"strings"
 	"time"
+)
+
+const (
+	CLOUD_AWS = "aws"
+	CLOUD_ALI = "aliyun"
+	CLOUD_HW  = "huawei"
+
+	API_AWS_META_DATA = "http://169.254.169.254/latest/meta-data/placement/availability-zone"
+	API_ALI_META_DATA = "http://100.100.100.200/latest/meta-data/zone-id"
+	API_HW_META_DATA  = "http://169.254.169.254/latest/meta-data/placement/availability-zone"
 )
 
 // Logger for log
@@ -17,18 +26,25 @@ type Logger interface {
 	Errorf(format string, v ...interface{})
 }
 
-func Zone() string {
-	out, err := exec.Command("/bin/bash", "-c", "/opt/aws/bin/ec2-metadata -z").Output()
+func Zone(cloud string) string {
+	var api string
+	switch cloud {
+	case CLOUD_AWS:
+		api = API_AWS_META_DATA
+	case CLOUD_ALI:
+		api = API_ALI_META_DATA
+	case API_HW_META_DATA:
+		api = API_HW_META_DATA
+	default:
+		api = API_AWS_META_DATA
+	}
+
+	out, err := exec.Command("curl", "-s", api).Output()
 	if err != nil {
 		return "unknown"
 	}
 
-	kv := strings.Split(string(out[:len(out)-1]), " ")
-	if len(kv) != 2 {
-		return "unknown"
-	}
-
-	return kv[1]
+	return string(out)
 }
 
 func IntPseudoRandom(min, max int) int {

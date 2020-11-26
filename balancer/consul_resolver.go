@@ -20,6 +20,7 @@ const (
 )
 
 type ConsulResolverBuilder struct {
+	Cloud             string
 	Address           string
 	Service           string
 	CPUThresholdKey   string
@@ -31,10 +32,10 @@ type ConsulResolverBuilder struct {
 }
 
 func (b *ConsulResolverBuilder) Build() (*ConsulResolver, error) {
-	return NewConsulResolver(b.Address, b.Service, b.CPUThresholdKey, b.ZoneCPUKey, b.InstanceFactorKey, b.OnlineLabKey, b.Interval, b.Timeout)
+	return NewConsulResolver(b.Cloud, b.Address, b.Service, b.CPUThresholdKey, b.ZoneCPUKey, b.InstanceFactorKey, b.OnlineLabKey, b.Interval, b.Timeout)
 }
 
-func NewConsulResolver(address, service, cpuThresholdKey, zoneCPUKey, instanceFactorKey, onlineLabKey string, interval, timeout time.Duration) (*ConsulResolver, error) {
+func NewConsulResolver(cloud, address, service, cpuThresholdKey, zoneCPUKey, instanceFactorKey, onlineLabKey string, interval, timeout time.Duration) (*ConsulResolver, error) {
 	config := api.DefaultConfig()
 	config.Address = address
 	client, err := api.NewClient(config)
@@ -52,7 +53,7 @@ func NewConsulResolver(address, service, cpuThresholdKey, zoneCPUKey, instanceFa
 		zoneCPUKey:         zoneCPUKey,
 		instanceFactorKey:  instanceFactorKey,
 		onlineLabKey:       onlineLabKey,
-		zone:               util.Zone(),
+		zone:               util.Zone(cloud),
 		done:               make(chan bool),
 		balanceFactorCache: make(map[string]float64),
 	}
