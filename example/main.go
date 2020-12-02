@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/mae-pax/consul-loadbalancer/balancer"
+	"github.com/msunyutao/consul-loadbalancer/balancer"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/zap"
 )

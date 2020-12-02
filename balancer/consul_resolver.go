@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/consul/api"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/mae-pax/consul-loadbalancer/util"
+	"github.com/msunyutao/consul-loadbalancer/util"
 )
 
 const (

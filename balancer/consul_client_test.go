@@ -3,7 +3,7 @@ package balancer_test
 import (
 	"testing"
 
-	"github.com/mae-pax/consul-loadbalancer/balancer"
+	"github.com/msunyutao/consul-loadbalancer/balancer"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mae-pax/consul-loadbalancer/util"
+	"github.com/msunyutao/consul-loadbalancer/util"
 )
 
 var (

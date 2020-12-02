@@ -3,7 +3,7 @@ package util_test
 import (
 	"testing"
 
-	"github.com/mae-pax/consul-loadbalancer/util"
+	"github.com/msunyutao/consul-loadbalancer/util"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
